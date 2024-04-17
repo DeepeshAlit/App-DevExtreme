@@ -4,7 +4,7 @@ import ReceiptModal from "./ReceiptModal";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { DeleteConfirmationModal } from '../../components';
-import DataGrid, { Column, Button as GridButton, Scrolling, Editing, Grouping, GroupPanel, Sorting, FilterRow, HeaderFilter, Selection, MasterDetail, Paging, Pager } from 'devextreme-react/data-grid';
+import DataGrid, { Column, Button as GridButton, Scrolling, Editing, Grouping, GroupPanel, Sorting, FilterRow, HeaderFilter, Selection, MasterDetail, Paging, Pager, RequiredRule } from 'devextreme-react/data-grid';
 import { LoadPanel } from 'devextreme-react/load-panel';
 import moment from "moment";
 
@@ -306,10 +306,6 @@ const ReceiptList = ({ darkMode }) => {
         }
     };
 
-    // const handleDateChange = (value) => {
-    //     setReceiptData({ ...receiptData, receiptDate: value });
-    //     setReceiptError({ ...receiptError, receiptDate: false })
-    // };
 
     const handleDateChange = useCallback((args) => {
         setReceiptData((prevApp) => ({
@@ -317,18 +313,6 @@ const ReceiptList = ({ darkMode }) => {
             receiptDate: args.value
         }));
     }, []);
-
-    // const handleChange = (e) => {
-    //     const { name, value } = e.target;
-
-    //     setReceiptData((prevState) => ({
-    //         ...prevState,
-    //         [name]: value,
-    //     }));
-    //     setReceiptError({
-    //         ...receiptError, [name]: false
-    //     })
-    // };
 
     const handleChange = useCallback((name, value) => {
         //    console.log("handleChange",name,value)
@@ -380,10 +364,10 @@ const ReceiptList = ({ darkMode }) => {
                 <Sorting mode='multiple' />
                 <FilterRow visible={true} />
                 <HeaderFilter visible={true} allowSearch="true" />
-                <Column dataField='ReceiptNo' caption='Receipt No' minWidth={150}/>
-                <Column dataField='ReceiptDate' caption='Receipt Date' minWidth={150} cellRender={data => formatReceiptDate(data.ReceiptDate)} />
-                <Column dataField='NetAmount' caption='Net Amount' minWidth={250} />
-                <Column dataField='Remarks' caption='Remarks' minWidth={300} />
+                <Column dataField='ReceiptNo' caption='Receipt No' minWidth={150} alignment="left" allowEditing={false} />
+                <Column dataField='ReceiptDate' caption='Receipt Date' minWidth={150} cellRender={data => formatReceiptDate(data.data.ReceiptDate)} dataType="date"><RequiredRule /></Column>
+                <Column dataField='NetAmount' caption='Net Amount' minWidth={250} alignment="left" allowEditing={false} />
+                <Column dataField='Remarks' caption='Remarks' minWidth={300}><RequiredRule /></Column>
                 <Column type='buttons' minWidth={250}>
                     <GridButton text='Edit' icon='edit' onClick={(row) => handleEditClick(row.row.data)} />
                     <GridButton text='Delete' icon='trash' onClick={(row) => handleDeleteClick(row.row.data.ReceiptID)} />

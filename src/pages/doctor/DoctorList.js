@@ -24,7 +24,9 @@ import DataGrid, {
     Lookup,
     Popup,
     Paging,
-    Pager
+    Pager,
+    RequiredRule,
+    AsyncRule
 } from 'devextreme-react/data-grid';
 import DetailTemplate from './DetailTemplate';
 const DoctorList = ({ darkMode }) => {
@@ -218,7 +220,7 @@ const DoctorList = ({ darkMode }) => {
         }
     };
 
-   
+
 
     const handleChange = useCallback((name, args) => {
         // const { name, value } = args;
@@ -301,7 +303,7 @@ const DoctorList = ({ darkMode }) => {
             //     setDuplicateError(true);
             // }
         }
-   
+
     }
     async function processBatchRequest(url, changes, component) {
         console.log("promiseBatch", changes, component)
@@ -318,7 +320,7 @@ const DoctorList = ({ darkMode }) => {
         }
     };
 
-   
+
 
 
 
@@ -388,12 +390,38 @@ const DoctorList = ({ darkMode }) => {
         setTimeout(() => { hideLoadPanel(); fetchDoctorList() }, 1000);
     }, []);
 
+    
+    async function sendRequest(value) {
+        debugger
+        try {
+            const response = await axios.get(`https://localhost:7137/api/Doctor/CheckDuplicateDoctorName/${value}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            if(response.status == 200){
+                return true
+            }else{
+                return false;
+            }
+        } catch (error) {
+            console.error('Error checking duplicate item name:', error);
+            return false;
+        }   
+    }
+
+
+
+    function asyncValidation(params,row) {
+        console.log("params from edit",params,row)
+        return sendRequest(params.value);
+    }
 
 
 
     return (
         <React.Fragment>
-                <h2 className={'content-block'}>Doctor List</h2>
+            <h2 className={'content-block'}>Doctor List</h2>
             <div className="w-100 d-flex justify-content-between my-2" >
                 <Button variant="primary" onClick={onClick}>Load</Button>
                 <Button variant="primary" onClick={handleAddClick}>Add</Button>
@@ -417,7 +445,7 @@ const DoctorList = ({ darkMode }) => {
             // onFocusedRowChanging={onFocusedRowChanging}
             // onFocusedRowChanged={onFocusedRowChanged}
             >
-                        <Paging defaultPageSize={10} />
+                <Paging defaultPageSize={10} />
                 <Pager showPageSizeSelector={true} showInfo={true} />
                 {/* <Scrolling mode="standard" /> */}
                 <Popup
@@ -431,12 +459,12 @@ const DoctorList = ({ darkMode }) => {
                     // allowAdding={true}
                     allowDeleting={true}
                     allowUpdating={true}
-
+                    startEditAction='dblClick'
                 />
                 <Selection
                     mode="multiple"
-                //   selectAllMode={allMode}
-                //   showCheckBoxesMode={checkBoxesMode}
+                    //   selectAllMode={allMode}
+                    showCheckBoxesMode={"onClick"}
                 />
                 <Grouping autoExpandAll={autoExpandAll} />
                 <GroupPanel visible={true} /> {/* or "auto" */}
@@ -445,7 +473,13 @@ const DoctorList = ({ darkMode }) => {
                 <HeaderFilter visible={true} allowSearch="true" />
                 <Column dataField="DoctorName" caption="Doctor Name"
                     minWidth={250}
-                />
+                >
+                    <RequiredRule />
+                    <AsyncRule
+                        message="Doctor Name is not unique"
+                        validationCallback={(row,params)=>asyncValidation(row,params)}
+                    />
+                </Column>
                 <Column dataField="SpecialityID" caption='Speciality Name' minWidth={250}>
                     <Lookup
                         dataSource={formattedSpecialtyOptions}
@@ -454,9 +488,11 @@ const DoctorList = ({ darkMode }) => {
                     />
                 </Column>
                 <Column dataField="Education" caption='Education'
-                // groupIndex={1}
+                    // groupIndex={1}
                     minWidth={250}
-                />
+                >
+                    <RequiredRule />
+                </Column>
                 <Column type='buttons' minWidth={100} >
                     <GridButton
                         text="Edit"

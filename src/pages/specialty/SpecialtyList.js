@@ -4,7 +4,7 @@ import SpecialtyModal from './SpecialtyModal';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { DeleteConfirmationModal } from '../../components';
-import DataGrid, { Column, Button as GridButton, Scrolling, Editing, Grouping, GroupPanel, Sorting, FilterRow, HeaderFilter, Selection, MasterDetail, Pager, Paging } from 'devextreme-react/data-grid';
+import DataGrid, { Column, Button as GridButton, Scrolling, Editing, Grouping, GroupPanel, Sorting, FilterRow, HeaderFilter, Selection, MasterDetail, Pager, Paging, RequiredRule, AsyncRule } from 'devextreme-react/data-grid';
 import CheckBox from 'devextreme-react/check-box';
 import { LoadPanel } from 'devextreme-react/load-panel';
 
@@ -266,6 +266,30 @@ const SpecialtyList = ({ darkMode }) => {
         setAutoExpandAll((previousAutoExpandAll) => !previousAutoExpandAll);
     }, []);
 
+    async function sendRequest(value) {
+        try {
+            const response = await axios.get(`https://localhost:7137/api/Speciality/CheckDuplicateSpecialityName/${value}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            if(response.status == 200){
+                return true
+            }else{
+                return false;
+            }
+        } catch (error) {
+            console.error('Error checking duplicate item name:', error);
+            return false;
+        }
+    }
+
+
+
+    function asyncValidation(params) {
+        debugger
+        return sendRequest(params.value);
+    }
 
 
 
@@ -309,7 +333,11 @@ const SpecialtyList = ({ darkMode }) => {
                     render={renderDetail}
                 />
                 <Column dataField='SpecialityName' caption='Speciality Name' minWidth={200} >
-
+                    <RequiredRule />
+                    <AsyncRule
+                        message="SpecialityName is not unique"
+                        validationCallback={asyncValidation}
+                    />
                 </Column>
                 <Column type='buttons'
                 >

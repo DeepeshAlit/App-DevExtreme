@@ -400,16 +400,16 @@ const AppointmentList = ({ darkMode }) => {
                 <Paging defaultPageSize={10} />
                 <Pager showPageSizeSelector={true} showInfo={true} />
                 <Scrolling mode='standard' />
-                <Editing mode='batch'
+                {/* <Editing mode='batch'
                     allowDeleting={true}
                     allowUpdating={true}
-                />
+                /> */}
                 <GroupPanel visible={true} />
                 <Sorting mode='multiple' />
                 <FilterRow visible={true} />
                 <HeaderFilter visible={true} allowSearch="true" />
                 <Column dataField='FullName' caption='Full Name' minWidth={200} />
-                <Column dataField='Gender' caption='Gender' minWidth={200} cellRender={data => data.value === 0 ? <td>Male</td> : <td>Female</td>}>
+                <Column dataField='Gender' caption='Gender' minWidth={200} alignment='left' allowEditing={false} cellRender={data => data.value === 0 ? <td>Male</td> : <td>Female</td>}>
                     <HeaderFilter allowSelectAll={true} dataSource={[
                         { value: 0, text: 'Male' },
                         { value: 1, text: 'Female' }
@@ -418,8 +418,8 @@ const AppointmentList = ({ darkMode }) => {
                     </HeaderFilter>
 
                 </Column>
-                <Column dataField='SpecialityName' caption='Speciality Name' minWidth={200} />
-                <Column dataField='DoctorName' caption='Doctor Name' minWidth={200}/>
+                <Column dataField='SpecialityName' caption='Speciality Name' minWidth={200}  allowEditing={false}/>
+                <Column dataField='DoctorName' caption='Doctor Name' minWidth={200} allowEditing={false}/>
                 <Column type='buttons' minWidth={250}>
                     <GridButton text='Edit' icon='edit' onClick={(row) => handleEditClick(row.row.data)} />
                     <GridButton text='Delete' icon='trash' onClick={(row) => handleDeleteClick(row.row.data.AppointmentID)} />
