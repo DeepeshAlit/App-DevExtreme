@@ -25,6 +25,7 @@ function withNavigationWatcher(Component, path) {
 
     return <Component {...props} />;
   }
+  
   return <WrappedComponent />;
 }
 

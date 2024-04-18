@@ -7,6 +7,7 @@ import { DeleteConfirmationModal } from '../../components';
 import DataGrid, { Column, Button as GridButton, Scrolling, Editing, Grouping, GroupPanel, Sorting, FilterRow, HeaderFilter, Selection, MasterDetail, Pager, Paging, RequiredRule, AsyncRule } from 'devextreme-react/data-grid';
 import CheckBox from 'devextreme-react/check-box';
 import { LoadPanel } from 'devextreme-react/load-panel';
+import { getAPI, postAPI, putAPI } from '../../services/Services';
 
 const SpecialtyList = ({ darkMode }) => {
     const token = localStorage.getItem("token");
@@ -45,20 +46,33 @@ const SpecialtyList = ({ darkMode }) => {
         }
     }, [])
 
+    // const getSpecialityList = async () => {
+    //     setLoadPanelVisible(true)
+    //     try {
+    //         const response = await axios.get('https://localhost:7137/api/Speciality/GetList', {
+    //             headers: {
+    //                 Authorization: `Bearer ${token}`
+    //             }
+    //         });
+    //         const specialities = response.data;
+    //         setSpecialties(specialities)
+    //         setLoadPanelVisible(false)
+    //         console.log('Speciality get list:', specialities);
+    //     } catch (error) {
+    //         console.error('Error fetching speciality list:', error.message);
+    //         setLoadPanelVisible(false)
+    //     }
+    // }
+
     const getSpecialityList = async () => {
         setLoadPanelVisible(true)
         try {
-            const response = await axios.get('https://localhost:7137/api/Speciality/GetList', {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-            const specialities = response.data;
-            setSpecialties(specialities)
+            const apiUrl = 'https://localhost:7137/api/Speciality/GetList';
+            const responseData = await getAPI(apiUrl, token);
+            setSpecialties(responseData)
             setLoadPanelVisible(false)
-            console.log('Speciality get list:', specialities);
         } catch (error) {
-            console.error('Error fetching speciality list:', error.message);
+            console.error('Error:', error.message);
             setLoadPanelVisible(false)
         }
     }
@@ -79,31 +93,31 @@ const SpecialtyList = ({ darkMode }) => {
         setIsModalOpen(true);
     };
 
-    const validateSpecialty = () => {
-        debugger
-        let hasError = false;
-        const newErrors = {};
+    // const validateSpecialty = () => {
+    //     debugger
+    //     let hasError = false;
+    //     const newErrors = {};
 
-        for (const key in speciality) {
-            if (!speciality[key]) {
-                newErrors[key] = true;
-                hasError = true;
-            } else {
-                newErrors[key] = false;
-            }
-        }
+    //     for (const key in speciality) {
+    //         if (!speciality[key]) {
+    //             newErrors[key] = true;
+    //             hasError = true;
+    //         } else {
+    //             newErrors[key] = false;
+    //         }
+    //     }
 
-        setSpecialtyError(newErrors);
+    //     setSpecialtyError(newErrors);
 
-        return hasError;
-    };
+    //     return hasError;
+    // };
 
     const handleSave = async (e) => {
         e.preventDefault();
         debugger
-        if (validateSpecialty()) {
-            return;
-        }
+        // if (validateSpecialty()) {
+        //     return;
+        // }
         if (selectedSpecialty) {
             const updatedData = {
 
@@ -113,46 +127,65 @@ const SpecialtyList = ({ darkMode }) => {
                 description: speciality?.Description
 
             }
-            try {
-                const response = await axios.put(`https://localhost:7137/api/Speciality/Update/`, updatedData, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-                getSpecialityList();
-                console.log('Speciality updated successfully:');
-                handleCloseModal();
-            } catch (error) {
-                console.error('Error updating speciality:', error.message);
-                if (error.response.data.includes("Cannot accept duplicate speciality name.")) {
-                    setDuplicateError(true);
+            // try {
+            //     const response = await axios.put(`https://localhost:7137/api/Speciality/Update/`, updatedData, {
+            //         headers: {
+            //             Authorization: `Bearer ${token}`,
+            //             'Content-Type': 'application/json'
+            //         }
+            //     });
+            //     getSpecialityList();
+            //     console.log('Speciality updated successfully:');
+            //     handleCloseModal();
+            // } catch (error) {
+            //     console.error('Error updating speciality:', error.message);
+            //     if (error.response.data.includes("Cannot accept duplicate speciality name.")) {
+            //         setDuplicateError(true);
+            //     }
+            // }
+              try {
+                    const apiUrl = 'https://localhost:7137/api/Speciality/Update/';
+                    await putAPI(apiUrl, updatedData, token);
+                    getSpecialityList();
+                    handleCloseModal();
+                } catch (error) {
+                    console.error('Error:', error.message);
                 }
-            }
+            
         } else {
-            try {
-                // Add new Specialty
-                const data = {
-                    "specialityName": speciality.SpecialityName,
-                    "description": speciality.Description
-                }
-                const response = await axios.post('https://localhost:7137/api/Speciality/Insert', data, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-                const resData = response.data;
-                getSpecialityList();
-                console.log('Speciality inserted successfully:', resData);
-                handleCloseModal();
-            } catch (error) {
-                console.error('Error inserting speciality:', error.message);
-                if (error.response.data.includes("Cannot accept duplicate speciality name.")) {
-                    setDuplicateError(true);
+            const data = {
+                "specialityName": speciality.SpecialityName,
+                "description": speciality.Description
+            }
+            // try {
+            //     // Add new Specialty
+            //     const response = await axios.post('https://localhost:7137/api/Speciality/Insert', data, {
+            //         headers: {
+            //             Authorization: `Bearer ${token}`,
+            //             'Content-Type': 'application/json'
+            //         }
+            //     });
+            //     const resData = response.data;
+            //     getSpecialityList();
+            //     console.log('Speciality inserted successfully:', resData);
+            //     handleCloseModal();
+            // } catch (error) {
+            //     console.error('Error inserting speciality:', error.message);
+            //     if (error.response.data.includes("Cannot accept duplicate speciality name.")) {
+            //         setDuplicateError(true);
+            //     }
+            // }
+          
+                try {
+                    const apiUrl = 'https://localhost:7137/api/Speciality/Insert';
+                     await postAPI(apiUrl, data, token);
+                    getSpecialityList();
+                        handleCloseModal();
+                } catch (error) {
+                    console.error('Error:', error.message);
                 }
             }
-        }
+        
 
     };
 

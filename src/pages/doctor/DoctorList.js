@@ -236,15 +236,6 @@ const DoctorList = ({ darkMode }) => {
     }, []);
 
 
-    // console.log("first", doctorError);
-
-    // const handleSpecialtyChange = (selectedOption) => {
-    //     setDuplicateError(false)
-    //     // setDoctor({ ...doctor, SpecialityID: selectedOption.value });
-
-    //     setDoctorError({ ...doctorError, SpecialityID: false })
-    // };
-
     const handleSpecialtyChange = useCallback((args) => {
         setDoctor((prevDoctor) => ({
             ...prevDoctor,
