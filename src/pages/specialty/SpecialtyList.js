@@ -7,7 +7,7 @@ import { DeleteConfirmationModal } from '../../components';
 import DataGrid, { Column, Button as GridButton, Scrolling, Editing, Grouping, GroupPanel, Sorting, FilterRow, HeaderFilter, Selection, MasterDetail, Pager, Paging, RequiredRule, AsyncRule } from 'devextreme-react/data-grid';
 import CheckBox from 'devextreme-react/check-box';
 import { LoadPanel } from 'devextreme-react/load-panel';
-import { getAPI, postAPI, putAPI } from '../../services/Services';
+import { fetchDataById, getAPI,postAPI,putAPI } from '../../services';
 
 const SpecialtyList = ({ darkMode }) => {
     const token = localStorage.getItem("token");
@@ -37,6 +37,7 @@ const SpecialtyList = ({ darkMode }) => {
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [autoExpandAll, setAutoExpandAll] = useState(true);
     const [loadPanelVisible, setLoadPanelVisible] = useState(false);
+    const [selectedRow,setSelectedRow] = useState([]);
     // const [selectedEmployeeNames, setSelectedEmployeeNames] = useState('Nobody has been selected');
     // const [prefix, setPrefix] = useState('');
 
@@ -114,7 +115,6 @@ const SpecialtyList = ({ darkMode }) => {
 
     const handleSave = async (e) => {
         e.preventDefault();
-        debugger
         // if (validateSpecialty()) {
         //     return;
         // }
@@ -282,24 +282,32 @@ const SpecialtyList = ({ darkMode }) => {
     }
     async function processBatchRequest(url, changes, component) {
         debugger
-        console.log("promiseBatch", changes, component)
         await sendBatchRequest(url, changes);
         await component.refresh(true);
         component.cancelEditData();
     }
-    const onSaving = (e) => {
+    const onSaving = async(e) => {
         debugger
-        console.log("eChanges", e)
         e.cancel = true;
-        if (e.changes.length) {
-            e.promise = processBatchRequest(`${"https://localhost:7137/api/Speciality/Update/"}`, e.changes, e.component);
+        if(e.changes[0].data.SpecialityName == e.changes[0].key.SpecialityName){
+        await e.component.refresh(true);
+        e.component.cancelEditData(); 
+        
         }
+        else if (e.changes.length) {
+            processBatchRequest(`${"https://localhost:7137/api/Speciality/Update/"}`, e.changes, e.component);
+        }
+        console.log("e",e)
     };
     const onAutoExpandAllChanged = useCallback(() => {
         setAutoExpandAll((previousAutoExpandAll) => !previousAutoExpandAll);
     }, []);
 
     async function sendRequest(value) {
+        if(selectedRow.SpecialityName === value){
+            return true
+        }
+        else{
         try {
             const response = await axios.get(`https://localhost:7137/api/Speciality/CheckDuplicateSpecialityName/${value}`, {
                 headers: {
@@ -316,15 +324,25 @@ const SpecialtyList = ({ darkMode }) => {
             return false;
         }
     }
+    }
 
 
 
     function asyncValidation(params) {
-        debugger
         return sendRequest(params.value);
     }
 
 
+    const getSpecialtyById=async(id)=> {
+        try {
+            const apiUrl = 'https://localhost:7137/api/Speciality/GetById';
+            const responseData = await fetchDataById(apiUrl, id, token);
+            setSelectedRow(responseData) 
+        } catch (error) {
+            console.error('Error:', error.message);
+        }
+    }
+    
 
     return (
         <React.Fragment>
@@ -345,6 +363,7 @@ const SpecialtyList = ({ darkMode }) => {
                 selectedRowKeys={selectedRowKeys}
                 onSelectionChanged={onSelectionChanged}
                 onSaving={onSaving}
+                onRowClick={(row)=>getSpecialtyById(row.data.SpecialityID)}
             >
                 <Paging defaultPageSize={5} />
                 <Pager showPageSizeSelector={true} showInfo={true} />
@@ -352,6 +371,8 @@ const SpecialtyList = ({ darkMode }) => {
                 <Editing mode='batch'
                     allowDeleting={true}
                     allowUpdating={true}
+                    startEditAction='dblClick'
+
                 />
                 <Selection
                     // showCheckBoxesMode='false'
@@ -395,12 +416,12 @@ const SpecialtyList = ({ darkMode }) => {
                 handleChange={handleChange}
                 speciality={speciality}
                 selectedSpecialty={selectedSpecialty}
-                errors={errors}
-                setErrors={setErrors}
+                // errors={errors}
+                // setErrors={setErrors}
                 setSpeciality={setSpeciality}
-                specialtyError={specialtyError}
-                duplicateError={duplicateError}
-                darkMode={darkMode}
+                // specialtyError={specialtyError}
+                // duplicateError={duplicateError}
+                // darkMode={darkMode}
             />}
 
             <DeleteConfirmationModal
